@@ -258,7 +258,7 @@ class Event(commands.Cog):
                 channels = voice_channel.guild.channels
                 for channel in channels:
                     if 'vc-log' in channel.name:
-                        await channel.send(f'{voice_channel.mention} に {member.nick} が入室しました')
+                            await channel.send(f'{voice_channel.mention} に {member.display_name} が入室しました')
         except:
             # await kushina.send(f'An error occurred:')
             pass
