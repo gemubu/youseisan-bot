@@ -241,7 +241,7 @@ class Event(commands.Cog):
         except:
             pass
 
-        # *-create-が名前についたVCに入ったとき新しいVCを作成し移動
+        # *-create vc-が名前についたVCに入ったとき新しいVCを作成し移動
         try:
             if '-create vc-' in after.channel.name:
                 category = after.channel.category
