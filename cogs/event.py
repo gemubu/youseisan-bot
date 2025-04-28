@@ -241,7 +241,7 @@ class Event(commands.Cog):
         except:
             pass
 
-        # *-create-が名前についたVCに入ったとき新しいVCを作成し移動
+        # *-create vc-が名前についたVCに入ったとき新しいVCを作成し移動
         try:
             if '-create vc-' in after.channel.name:
                 category = after.channel.category
@@ -258,7 +258,7 @@ class Event(commands.Cog):
                 channels = voice_channel.guild.channels
                 for channel in channels:
                     if 'vc-log' in channel.name:
-                        await channel.send(f'{voice_channel.mention} に {member.nick} が入室しました')
+                            await channel.send(f'{voice_channel.mention} に {member.display_name} が入室しました')
         except:
             # await kushina.send(f'An error occurred:')
             pass
