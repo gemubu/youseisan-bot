@@ -39,7 +39,7 @@ class Birthdays(BaseModel):
     table_name = 'birthdays'
     fields = {
         'user_id': 'BIGINT',
-        'birthday': 'DATE',
+        'birthday': 'TEXT',
         'channel_id': 'BIGINT',
     }
 
