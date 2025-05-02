@@ -95,6 +95,9 @@ class Twitch(commands.Cog):
     async def twitch_notification(self) -> None:
         """配信開始通知を送信する
         """
+        # todo 同じ配信者が多数のチャンネルに登録されている時に登録されているチャンネルの数だけ埋め込みを生成しなおしている問題
+        # todo データベース構造から変更する or
+        # todo データを取得した後に同じユーザーをまとめてから処理する　<- こっちの方が楽そう
         async def check_history(time: str):
             messages = [message async for message in channel.history(limit=20)]
             for message in messages:
