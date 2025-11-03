@@ -80,7 +80,7 @@ class Birthday(commands.Cog):
         birthday_list = Birthdays.all()
         for i in birthday_list:
             if i['birthday'] == date_str:
-                await self.bot.get_channel(i[2]).send(f'今日は <@{i["user_id"]}> の誕生日です\nおめでとうございます')
+                await self.bot.get_channel(i["channel_id"]).send(f'今日は <@{i["user_id"]}> の誕生日です!!!')
 
 async def setup(bot):
     await bot.add_cog(Birthday(bot))
