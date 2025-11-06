@@ -1,15 +1,23 @@
 import discord
 from discord.ext import commands
-import config
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
+BOT_TOKEN = os.getenv("BOT_TOKEN")
 
+# discord.opus.load_opus('/opt/homebrew/lib/libopus.dylib')  # M1/M2 Macの場合
+
+#! テストする時は関係ないcogはコメントアウトする
+#! 今コメントアウトしてるやつはコード変更で動かなくなってる。ごめん
 INITIAL_EXTENSIONS = [
     'cogs.general',
     'cogs.admin',
-    'cogs.twitch',
-    'cogs.birthday',
-    'cogs.event',
-    'cogs.level',
+    #'cogs.twitch',
+    #'cogs.birthday',
+    #'cogs.event',
+    #'cogs.level',
+    'cogs.tts',
 ]
 
 intents = discord.Intents.all()
@@ -23,4 +31,4 @@ class MyBot(commands.Bot):
 
 bot = MyBot(command_prefix='!', intents=intents)
 
-bot.run(config.TEST_TOKEN)
+bot.run(BOT_TOKEN)

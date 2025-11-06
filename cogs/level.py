@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from models import UserLevels, ServerLevels
 from datetime import timezone, timedelta
+from discord import app_commands
 
 
 
@@ -36,7 +37,7 @@ class Level(commands.Cog):
                               xp=user_level['xp'],
                               last_message=message.created_at)
 
-    @discord.app_commands.command(name='level', description='レベルを表示します')
+    @app_commands.command(name='level', description='レベルを表示します')
     async def level(self, ctx: discord.Interaction):
         user_level = UserLevels.get(user_id=ctx.user.id , guild_id=ctx.guild.id)
         if user_level is None:
@@ -44,7 +45,7 @@ class Level(commands.Cog):
         else:
             await ctx.response.send_message(content=f'レベルは{user_level["level"]}です')
 
-    @discord.app_commands.command(name='rank', description='ランキングを表示します')
+    @app_commands.command(name='rank', description='ランキングを表示します')
     async def rank(self, ctx: discord.Interaction):
         user_levels = UserLevels.filter(guild_id=ctx.guild.id)
         user_levels.sort(key=lambda x: x['level'], reverse=True)

@@ -5,6 +5,8 @@ from discord.ext import commands
 import config
 from models import Twitch as twitch_database
 import datetime
+import aiohttp
+import io
 
 class Twitch(commands.Cog):
     def __init__(self, bot):
@@ -95,6 +97,9 @@ class Twitch(commands.Cog):
     async def twitch_notification(self) -> None:
         """配信開始通知を送信する
         """
+        # todo 同じ配信者が多数のチャンネルに登録されている時に登録されているチャンネルの数だけ埋め込みを生成しなおしている問題
+        # todo データベース構造から変更する or
+        # todo データを取得した後に同じユーザーをまとめてから処理する　<- こっちの方が楽そう
         async def check_history(time: str):
             messages = [message async for message in channel.history(limit=20)]
             for message in messages:
@@ -124,12 +129,21 @@ class Twitch(commands.Cog):
                         title=stream.title, url=f'https://www.twitch.tv/{streamer.login}', color=discord.Color.purple())
                     embed.set_author(name=streamer.display_name, icon_url=streamer.profile_image_url,
                                     url=f'https://www.twitch.tv/{streamer.login}')
+                    #* サムネイル画像を設定する
                     stream_img = f"https://static-cdn.jtvnw.net/previews-ttv/live_user_{user_dict['twitch_username']}-440x248.jpg"
-                    embed.set_image(url=stream_img)
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(stream_img) as resp:
+                            if resp.status != 200:
+                                return
+                            data = await resp.read()
+                            image_bytes = io.BytesIO(data)
+                            image_bytes.seek(0)
+                            file = discord.File(image_bytes, filename="image.png")
+                    embed.set_image(url="attachment://image.png")
                     embed.add_field(
                         name='Game', value=stream.game_name, inline=False)
                     embed.set_footer(text=stream_start_time_str)
-                    await self.bot.get_channel(user_dict['channel_id']).send(f'{streamer.display_name}が配信を開始しました', embed=embed)
+                    await self.bot.get_channel(user_dict['channel_id']).send(f'{streamer.display_name}が配信を開始しました', embed=embed, file=file)
         await twitch.close()
 
 
