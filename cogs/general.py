@@ -5,7 +5,6 @@ import re
 import random
 import asyncio
 import datetime
-from models import ServerLevels
 
 
 class General(commands.Cog):
@@ -280,7 +279,7 @@ class General(commands.Cog):
             if channel is not None:
                 await channel.delete()
 
-    @commands.command()
+"""    @commands.command()
     async def startlevel(self, ctx: commands.Context):
         if ctx.guild is None:
             await ctx.send(content='サーバー内で実行してください')
@@ -292,7 +291,7 @@ class General(commands.Cog):
             else:
                 await ctx.send(content='すでに開始されています', ephemeral=True)
         else:
-            await ctx.send(content='権限がありません', ephemeral=True)
+            await ctx.send(content='権限がありません', ephemeral=True)"""
 
 def divide_list(l, i) -> list:
     """リストをランダムに分割する

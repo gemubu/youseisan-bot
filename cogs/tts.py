@@ -56,10 +56,12 @@ class Tts(commands.Cog):
         voice_channel = ctx.user.voice.channel
         try:
             # todo 現在の設定と，今月の使用した文字数，設定するためのサイトへ飛ぶリンクを埋め込みで送信
+            # todo 現在の設定と文字数をapi経由で取得する
             await voice_channel.connect(reconnect=False)
             await ctx.response.send_message(f"{channel.name} に接続しました。")
-            self.active_channel[ctx.guild.id] = ctx.channel.id
-            self.voice_settings[ctx.channel.id] = {"language":"ja-JP", "voice":"ja-JP-Neural2-C", "char_count":0}
+            if ctx.guild is not None and ctx.channel is not None:
+                self.active_channel[ctx.guild.id] = ctx.channel.id
+                self.voice_settings[ctx.channel.id] = {"language":"ja-JP", "voice":"ja-JP-Neural2-C", "char_count":0}
 
             # サーバー専用の再生キューを作成
             self.guild_queues[ctx.guild.id] = asyncio.Queue()
@@ -110,15 +112,22 @@ class Tts(commands.Cog):
         if message.channel.id != self.active_channel[guild_id]:
             return
 
+        # urlが含まれていたらその部分をurlに置き換え
+        url_pattern = re.compile(r'(https?://[^\s]+)')
+        content = re.sub(url_pattern, 'URL', message.content or '')
+
         # 絵文字削除
         custom_emoji_pattern = re.compile(r'<a?:\w+:\d+>')
-        message.content = re.sub(custom_emoji_pattern, '', message.content)
-        if not message.content.strip():
+        content = re.sub(custom_emoji_pattern, '', content)
+        if not content.strip():
             return
 
-        # テキストをキューに追加
-        await self.guild_queues[guild_id].put((message.channel, message.content))
-
+        # キューが存在するか確認して追加
+        queue = self.guild_queues.get(guild_id)
+        if queue is None:
+            queue = asyncio.Queue()
+            self.guild_queues[guild_id] = queue
+        await queue.put((message.channel, content))
 
 
     async def play_audio_loop(self, guild: discord.Guild):
@@ -163,32 +172,57 @@ class Tts(commands.Cog):
     # vcからbot以外の全てのメンバーがいなくなった時,VCから切断する
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before: discord.VoiceState, after: discord.VoiceState) -> None:
-        if before.channel is not None:
-            try:
-                guild = before.channel.guild
-                if len(before.channel.members) and before.channel.members[0].id == self.bot.user.id and len(before.channel.members) == 1:
-                    await before.channel.send("自動でVCから切断しました。")
-                    vc = guild.voice_client
-                    self.active_channel.pop(guild.id, None)
-                    if guild.id in self.play_tasks:
-                        self.play_tasks[guild.id].cancel()
-                        self.play_tasks.pop(guild.id, None)
-                    await vc.disconnect()
-            except Exception as e:
-                print(e)
-                pass
+        try:
+            # 前のチャンネル情報がない場合は無視
+            if before.channel is None:
+                return
 
-            try:
-                if len(before.channel.members) and member.id == self.bot.user.id and after.channel == None:
-                    guild = before.channel.guild
-                    await before.channel.send("VCから切断されたため読み上げを停止します。")
-                    self.active_channel.pop(before.channel.guild.id, None)
-                    if guild.id in self.play_tasks:
-                        self.play_tasks[guild.id].cancel()
-                        self.play_tasks.pop(guild.id, None)
-            except Exception as e:
-                print(e)
-                pass
+            voice_chan = before.channel
+            guild = voice_chan.guild
+
+            # bot がいるチャンネルかを確認
+            vc = guild.voice_client
+            if vc is None or not vc.is_connected():
+                return
+
+            # 対象チャンネルの非ボットメンバー数を確認
+            non_bot_members = [m for m in voice_chan.members if not m.bot]
+            if len(non_bot_members) == 0:
+                # 通知はアクティブなテキストチャンネルへ送る
+                text_channel_id = self.active_channel.get(guild.id)
+                text_channel = self.bot.get_channel(text_channel_id) if text_channel_id else None
+                if text_channel is not None:
+                    try:
+                        await text_channel.send("自動でVCから切断しました。")
+                    except Exception:
+                        pass
+
+                self.active_channel.pop(guild.id, None)
+                if guild.id in self.play_tasks:
+                    self.play_tasks[guild.id].cancel()
+                    self.play_tasks.pop(guild.id, None)
+                try:
+                    await vc.disconnect()
+                except Exception:
+                    pass
+
+            # bot が自分で切断された等の判定（移動・切断など）もテキスト通知する
+            if member.id == self.bot.user.id and after.channel is None:
+                text_channel_id = self.active_channel.get(guild.id)
+                text_channel = self.bot.get_channel(text_channel_id) if text_channel_id else None
+                if text_channel is not None:
+                    try:
+                        await text_channel.send("VCから切断されたため読み上げを停止します。")
+                    except Exception:
+                        pass
+                self.active_channel.pop(guild.id, None)
+                if guild.id in self.play_tasks:
+                    self.play_tasks[guild.id].cancel()
+                    self.play_tasks.pop(guild.id, None)
+
+        except Exception as e:
+            print(f"[TTS] on_voice_state_update error: {e}")
+            pass
 
 
 async def setup(bot):

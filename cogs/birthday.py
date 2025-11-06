@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-from models import Birthdays
 import re
 import os
 
