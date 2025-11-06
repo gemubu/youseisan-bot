@@ -52,7 +52,6 @@ class Event(commands.Cog):
             except Exception as e:
                 await message.channel.send(f'An error occurred: {e}')
 
-    @commands.Cog.listener()
     async def on_button_click(self, ctx: discord.Interaction):
         def find_num(s: str) -> list:
             """募集人数を取得する

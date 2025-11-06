@@ -1,18 +1,18 @@
 import discord
+from discord import app_commands
 from discord.ext import commands
 import re
 import random
 import asyncio
 import datetime
-from models import ServerLevels
 
 
 class General(commands.Cog):
     def __init__(self, bot):
         self.bot: commands.Bot = bot
 
-    @discord.app_commands.command(name='team', description='チーム分けを行う')
-    @discord.app_commands.describe(num_team='チーム数', exclude_member='除外するメンバー', auto='チーム分け後に自動でVCを移動するかどうか(何かしら入力されてたら今いるVCのすぐ下にチームVCが作成され、自動で送られます)')
+    @app_commands.command(name='team', description='チーム分けを行う')
+    @app_commands.describe(num_team='チーム数', exclude_member='除外するメンバー', auto='チーム分け後に自動でVCを移動するかどうか(移動する場合は"y" 今いるVCのすぐ下にチームVCが作成され、自動で送られます)')
     async def team(self, ctx: discord.Interaction, num_team: int = 2,
                 exclude_member: str = None,
                 auto: str = None):
@@ -20,7 +20,7 @@ class General(commands.Cog):
         Args:
             num_team (int): チーム数
             exclude_member (str): 除外するメンバー
-            auto (str): チーム分け後に自動でVCを移動するかどうか(何かしら入力されてたら今いるVCのすぐ下にチームVCが作成され、自動で送られます)
+            auto (str): 'チーム分け後に自動でVCを移動するかどうか(移動する場合は"y" 今いるVCのすぐ下にチームVCが作成され、自動で送られます)
         """
         # ボイスチャンネルに参加しているメンバーを取得
         try:
@@ -58,8 +58,8 @@ class General(commands.Cog):
                     await member.move_to(voice_channel)
             await ctx.channel.send('チーム分けが完了しました')
 
-    @discord.app_commands.command(name='dice', description='ダイスを振ります')
-    @discord.app_commands.describe(num='ダイスの個数')
+    @app_commands.command(name='dice', description='ダイスを振ります')
+    @app_commands.describe(num='ダイスの個数')
     async def dice(self, ctx: discord.Interaction, num: int = 1):
         """ダイスを振る
         Args:
@@ -75,7 +75,7 @@ class General(commands.Cog):
             title='ダイス結果', description=result_str, color=0xffffff)
         await ctx.response.send_message(embed=embed)
 
-    @discord.app_commands.command(name='r', description='募集を行います')
+    @app_commands.command(name='r', description='募集を行います')
     async def r(self, ctx: discord.Interaction, title: str, detail: str = None, max: int = None, role: str = None, channel: str = None):
         """募集を行う
         Args:
@@ -83,7 +83,7 @@ class General(commands.Cog):
             detail (str): 募集内容
             max (int): 募集人数
             role (str): 付与するロール
-            channel (str): 新たなチャンネルを作成するかどうか
+            channel (str): 新たなチャンネルを作成するかどうか(作成する場合"y"を入力)
         """
         embed = discord.Embed(title=title, description=detail, color=0x00ff00)
         name = '参加者'
@@ -110,7 +110,7 @@ class General(commands.Cog):
         else:
             await ctx.response.send_message(embed=embed, view=view)
 
-    @discord.app_commands.command(name='vc', description='VC名を変更します VC名に"##"が含まれているVCのみ名前を変更できます')
+    @app_commands.command(name='vc', description='VC名を変更します VC名に"##"が含まれているVCのみ名前を変更できます')
     async def vc(self, ctx: discord.Interaction, name: str):
         """VC名を変更する
         Args:
@@ -128,7 +128,7 @@ class General(commands.Cog):
             await ctx.response.send_message(content=f'<@{ctx.user.id}> ボイスチャンネルに参加してからコマンドを実行してください', ephemeral=True)
 
     #抽選コマンド
-    @discord.app_commands.command(name='select', description='指定された人数抽選します')
+    @app_commands.command(name='select', description='指定された人数抽選します')
     async def select(self, ctx: discord.Interaction, num: int):
         embed = discord.Embed(title='セレクトからユーザーを選択', description=num, color=0x00ff00)
         embed.add_field(name='ユーザー', value='')
@@ -140,7 +140,7 @@ class General(commands.Cog):
         await ctx.response.send_message(embed=embed, view=view)
 
     # embed作成コマンド
-    @discord.app_commands.command(name='embed', description='埋め込みメッセージを作成します')
+    @app_commands.command(name='embed', description='埋め込みメッセージを作成します')
     async def embed(self, ctx: discord.Interaction):
         try:
             overwrites = {
@@ -279,7 +279,7 @@ class General(commands.Cog):
             if channel is not None:
                 await channel.delete()
 
-    @commands.command()
+"""    @commands.command()
     async def startlevel(self, ctx: commands.Context):
         if ctx.guild is None:
             await ctx.send(content='サーバー内で実行してください')
@@ -291,7 +291,7 @@ class General(commands.Cog):
             else:
                 await ctx.send(content='すでに開始されています', ephemeral=True)
         else:
-            await ctx.send(content='権限がありません', ephemeral=True)
+            await ctx.send(content='権限がありません', ephemeral=True)"""
 
 def divide_list(l, i) -> list:
     """リストをランダムに分割する
