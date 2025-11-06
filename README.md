@@ -38,9 +38,9 @@
 | ブランチ名 | 用途 | 説明 |
 |-------------|------|------|
 | `main` | 本番用 | 常にリリース可能な状態を保つ。本番反映専用。直接コミットは禁止。 |
-| `develop` | 開発用 | 開発のメインブランチ。ここに各機能ブランチをマージする。 |
-| `feature/*` | 機能開発用 | 新機能や修正ごとに作成する一時ブランチ。完了後に `develop` へマージする。 |
-| `hotfix/*` | 緊急修正用 | 本番環境で発生したバグを即時修正するブランチ。修正後は `main` と `develop` の両方へマージする。 |
+| `dev` | 開発用 | 開発のメインブランチ。ここに各機能ブランチをマージする。 |
+| `feature/*` | 機能開発用 | 新機能や修正ごとに作成する一時ブランチ。完了後に `dev` へマージする。 |
+| `hotfix/*` | 緊急修正用 | 本番環境で発生したバグを即時修正するブランチ。修正後は `main` と `dev` の両方へマージする。 |
 
 ---
 
@@ -48,9 +48,9 @@
 
 1. **開発ブランチ作成**
    ```bash
-   # develop ブランチを最新にする
-   git checkout develop
-   git pull origin develop
+   # dev ブランチを最新にする
+   git checkout dev
+   git pull origin dev
 
    # 新しい機能ブランチを作成する（例: feature/login）
    git checkout -b feature/login
@@ -63,7 +63,7 @@
 
 3. **プルリクエスト作成**
 
-   - 作業完了後，GitHub上で `feature/xxx → develop` の Pull Request（PR）を作成する。  
+   - 作業完了後，GitHub上で `feature/xxx → dev` の Pull Request（PR）を作成する。  
    - 他メンバーによるレビューを経てマージする。
 
 4. **リリース**
@@ -72,7 +72,7 @@
    # main ブランチへ切り替え，develop の内容をマージする
    git checkout main
    git pull origin main
-   git merge --no-ff develop
+   git merge --no-ff dev
 
    # リリースタグを作成する（例: v1.0.0）
    git tag -a v1.0.0 -m "初回リリース"
@@ -122,11 +122,11 @@
 
 
 ### 1. 作業ブランチを作成する
-作業を始める前に，最新の `develop` ブランチから新しいブランチを作成します。
+作業を始める前に，最新の `dev` ブランチから新しいブランチを作成します。
 
 ```bash
-git checkout develop
-git pull origin develop
+git checkout dev
+git pull origin dev
 git checkout -b feature/〇〇
 ```
 ---
@@ -138,14 +138,14 @@ git checkout -b feature/〇〇
 git checkout feature/〇〇
 ```
 
-### 3. 最新の `develop` を取り込む（他メンバーの変更を反映）
-他のメンバーが `develop` に新しい変更をマージしている場合，自分の作業ブランチにも取り込みます。
+### 3. 最新の `dev` を取り込む（他メンバーの変更を反映）
+他のメンバーが `dev` に新しい変更をマージしている場合，自分の作業ブランチにも取り込みます。
 
 ```bash
-git checkout develop
-git pull origin develop
+git checkout dev
+git pull origin dev
 git checkout feature/〇〇
-git merge develop
+git merge dev
 ```
 
 ### 4. 変更をコミット・プッシュする
@@ -158,7 +158,7 @@ git push origin feature/〇〇
 ```
 
 ### 5. プルリクエストを作成する
-GitHub上で「`feature/〇〇` → `develop`」に対してプルリクエスト（Pull Request）を作成します。
+GitHub上で「`feature/〇〇` → `dev`」に対してプルリクエスト（Pull Request）を作成します。
 
 > **ポイント**
 > - PRタイトルは簡潔に（例：「ユーザー登録APIを実装」）  
@@ -174,7 +174,7 @@ git push origin feature/〇〇
 ```
 
 ### 7. マージ
-レビューが通ったら，`develop` ブランチにマージします。
+レビューが通ったら，`dev` ブランチにマージします。
 
 ### 8. 作業ブランチの削除
 マージ後は不要になったブランチを削除します。
