@@ -11,6 +11,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN")
 #! テストする時は関係ないcogはコメントアウトする
 #! 今コメントアウトしてるやつはコード変更で動かなくなってる。ごめん
 INITIAL_EXTENSIONS = [
+    'cogs.startapp',
     'cogs.general',
     'cogs.admin',
     #'cogs.twitch',
